@@ -143,9 +143,17 @@ interface PanelProps {
   children: React.ReactNode;
   className?: string;
   id?: string;
+  actions?: React.ReactNode;
 }
 
-export function Panel({ title, subtitle, children, className, id }: PanelProps) {
+export function Panel({
+  title,
+  subtitle,
+  children,
+  className,
+  id,
+  actions,
+}: PanelProps) {
   return (
     <section
       id={id}
@@ -154,13 +162,16 @@ export function Panel({ title, subtitle, children, className, id }: PanelProps) 
         className,
       )}
     >
-      <div className="mb-5">
-        <h2 className="text-sm font-semibold tracking-tight text-foreground">
-          {title}
-        </h2>
-        {subtitle && (
-          <p className="mt-0.5 text-xs text-muted">{subtitle}</p>
-        )}
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-sm font-semibold tracking-tight text-foreground">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="mt-0.5 text-xs text-muted">{subtitle}</p>
+          )}
+        </div>
+        {actions}
       </div>
       {children}
     </section>

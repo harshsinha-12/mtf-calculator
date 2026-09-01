@@ -48,32 +48,11 @@ export function Dashboard({ store }: DashboardProps) {
 
   return (
     <div className="space-y-6">
-      {/* Hero summary */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-[var(--hero-from)] via-[var(--hero-via)] to-[var(--hero-to)] p-6 backdrop-blur-md"
-      >
-        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-400/5 blur-3xl" />
-        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-emerald-400/5 blur-3xl" />
-
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                MTF Lab
-              </h1>
-              <span className="rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-600 ring-1 ring-amber-400/20 dark:text-amber-400">
-                {inputs.mode}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-muted">
-              {position.quantity} shares @ {formatINR(inputs.stockPrice)} ·{" "}
-              {inputs.holdingPeriodDays} day hold · {inputs.leverage}x leverage
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
+      <Panel
+        title="Adjust Parameters"
+        subtitle="All values are editable"
+        actions={
+          <div className="flex flex-wrap justify-end gap-2">
             <button
               type="button"
               onClick={goHome}
@@ -99,7 +78,47 @@ export function Dashboard({ store }: DashboardProps) {
               Reset
             </button>
           </div>
+        }
+      >
+        <div className="mb-4 flex gap-2 rounded-xl border border-border bg-surface/80 p-1.5">
+          {(["cash", "pledge", "mixed"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => update({ mode: m })}
+              className={`flex-1 rounded-lg py-2 text-xs font-medium capitalize transition ${
+                inputs.mode === m
+                  ? "bg-amber-400 text-amber-950"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              {m}
+            </button>
+          ))}
         </div>
+        <InputPanel inputs={inputs} onChange={update} step="all" />
+      </Panel>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-[var(--hero-from)] via-[var(--hero-via)] to-[var(--hero-to)] p-6 backdrop-blur-md"
+      >
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-400/5 blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-emerald-400/5 blur-3xl" />
+
+        <div className="relative flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            MTF Lab
+          </h1>
+          <span className="rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-600 ring-1 ring-amber-400/20 dark:text-amber-400">
+            {inputs.mode}
+          </span>
+        </div>
+        <p className="relative mt-1 text-sm text-muted">
+          {position.quantity} shares @ {formatINR(inputs.stockPrice)} ·{" "}
+          {inputs.holdingPeriodDays} day hold · {inputs.leverage}x leverage
+        </p>
 
         <div className="relative mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
@@ -138,27 +157,6 @@ export function Dashboard({ store }: DashboardProps) {
           />
         </div>
       </motion.div>
-
-      {/* Parameters */}
-      <Panel title="Adjust Parameters" subtitle="All values are editable">
-        <div className="mb-4 flex gap-2 rounded-xl border border-border bg-surface/80 p-1.5">
-          {(["cash", "pledge", "mixed"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => update({ mode: m })}
-              className={`flex-1 rounded-lg py-2 text-xs font-medium capitalize transition ${
-                inputs.mode === m
-                  ? "bg-amber-400 text-amber-950"
-                  : "text-muted hover:text-foreground"
-              }`}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
-        <InputPanel inputs={inputs} onChange={update} step="all" />
-      </Panel>
 
       {/* Decision engine */}
       <Panel
