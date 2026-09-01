@@ -15,17 +15,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useChartTheme } from "@/hooks/use-chart-theme";
 import { formatINR, formatINRCompact, formatPercent } from "@/lib/utils";
-
-const chartTheme = {
-  grid: "#27272a",
-  axis: "#52525b",
-  tooltip: {
-    bg: "#18181b",
-    border: "#3f3f46",
-    text: "#fafafa",
-  },
-};
+import { cn } from "@/lib/utils";
 
 function ChartTooltip({
   active,
@@ -33,20 +25,26 @@ function ChartTooltip({
   label,
   labelFormatter,
   valueFormatter,
+  theme,
 }: {
   active?: boolean;
   payload?: { value: number; name: string; color: string }[];
   label?: string | number;
   labelFormatter?: (l: string | number) => string;
   valueFormatter?: (v: number) => string;
+  theme: ReturnType<typeof useChartTheme>;
 }) {
   if (!active || !payload?.length) return null;
   return (
     <div
-      className="rounded-lg border border-zinc-700 bg-zinc-900/95 px-3 py-2 shadow-xl backdrop-blur-sm"
+      className={cn(
+        "rounded-lg border px-3 py-2 shadow-xl backdrop-blur-sm",
+        theme.tooltipBorder,
+        theme.tooltipBg,
+      )}
       style={{ fontSize: 12 }}
     >
-      <p className="mb-1 font-mono text-zinc-400">
+      <p className={cn("mb-1 font-mono", theme.tooltipText)}>
         {labelFormatter ? labelFormatter(label ?? "") : label}
       </p>
       {payload.map((p) => (
@@ -64,6 +62,8 @@ interface PnLChartProps {
 }
 
 export function PnLChart({ data, breakEvenReturn }: PnLChartProps) {
+  const chartTheme = useChartTheme();
+
   return (
     <ResponsiveContainer width="100%" height={280}>
       <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -93,12 +93,13 @@ export function PnLChart({ data, breakEvenReturn }: PnLChartProps) {
         <Tooltip
           content={
             <ChartTooltip
+              theme={chartTheme}
               labelFormatter={(l) => `Stock ${formatPercent(Number(l))}`}
               valueFormatter={(v) => formatINR(v)}
             />
           }
         />
-        <ReferenceLine y={0} stroke="#52525b" strokeDasharray="4 4" />
+        <ReferenceLine y={0} stroke={chartTheme.reference} strokeDasharray="4 4" />
         <ReferenceLine
           x={breakEvenReturn}
           stroke="#fbbf24"
@@ -113,7 +114,7 @@ export function PnLChart({ data, breakEvenReturn }: PnLChartProps) {
         <Area
           type="monotone"
           dataKey="netPnL"
-          stroke="#a1a1aa"
+          stroke={chartTheme.stroke}
           strokeWidth={2}
           fill="url(#pnlGradient)"
           dot={false}
@@ -129,6 +130,8 @@ interface BreakEvenChartProps {
 }
 
 export function BreakEvenChart({ data, holdingPeriod }: BreakEvenChartProps) {
+  const chartTheme = useChartTheme();
+
   return (
     <ResponsiveContainer width="100%" height={280}>
       <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -150,6 +153,7 @@ export function BreakEvenChart({ data, holdingPeriod }: BreakEvenChartProps) {
         <Tooltip
           content={
             <ChartTooltip
+              theme={chartTheme}
               labelFormatter={(l) => `Day ${l}`}
               valueFormatter={(v) => `${v.toFixed(2)}% needed`}
             />
@@ -183,6 +187,8 @@ interface LeverageChartProps {
 }
 
 export function LeverageChart({ data }: LeverageChartProps) {
+  const chartTheme = useChartTheme();
+
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -204,12 +210,13 @@ export function LeverageChart({ data }: LeverageChartProps) {
         <Tooltip
           content={
             <ChartTooltip
+              theme={chartTheme}
               labelFormatter={(l) => `${l}x leverage`}
               valueFormatter={(v) => formatINR(v)}
             />
           }
         />
-        <ReferenceLine y={0} stroke="#52525b" />
+        <ReferenceLine y={0} stroke={chartTheme.reference} />
         <Bar dataKey="netPnL" radius={[4, 4, 0, 0]}>
           {data.map((entry) => (
             <Cell
@@ -252,17 +259,17 @@ function ScenarioCell({
       type="button"
       onClick={onSelect}
       className={`flex min-h-[4.5rem] flex-col items-center justify-center rounded-lg px-2 py-3 text-center transition-all ${
-        isSelected ? "ring-2 ring-amber-400 ring-offset-1 ring-offset-zinc-950" : ""
+        isSelected ? "ring-2 ring-amber-400 ring-offset-1 ring-offset-background" : ""
       }`}
       style={{ backgroundColor: bg }}
     >
-      <span className="font-mono text-[10px] leading-tight text-zinc-400 sm:text-xs">
+      <span className="font-mono text-[10px] leading-tight text-muted sm:text-xs">
         {movement > 0 ? "+" : ""}
         {movement}%
       </span>
       <span
         className={`mt-1.5 w-full truncate font-mono text-[10px] font-semibold leading-tight sm:text-xs ${
-          isProfit ? "text-emerald-400" : "text-rose-400"
+          isProfit ? "text-profit" : "text-loss"
         }`}
       >
         {formatINRCompact(netPnL)}
@@ -286,7 +293,7 @@ export function ScenarioHeatmap({
     <div className="space-y-2">
       {lossZone.length > 0 && (
         <div>
-          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-rose-400/80">
+          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-loss/80">
             Loss zone
           </p>
           <div
@@ -310,7 +317,7 @@ export function ScenarioHeatmap({
 
       {profitZone.length > 0 && (
         <div>
-          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-emerald-400/80">
+          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-profit/80">
             Profit zone
           </p>
           <div

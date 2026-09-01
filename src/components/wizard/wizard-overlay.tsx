@@ -51,19 +51,18 @@ export function WizardOverlay({ store }: WizardOverlayProps) {
       <button
         type="button"
         aria-label="Close setup guide"
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm"
         onClick={closeWizard}
       />
-      <div className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-zinc-800 bg-[#09090b] p-6 shadow-2xl">
+      <div className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-2xl">
         <button
           type="button"
           onClick={closeWizard}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-200"
+          className="absolute right-4 top-4 rounded-lg p-1.5 text-muted transition hover:bg-surface-elevated hover:text-foreground"
         >
           <X className="h-5 w-5" />
         </button>
 
-        {/* Progress */}
         <div className="mb-6 flex items-center gap-2 pr-8">
           {STEPS.map((s, i) => (
             <button
@@ -72,7 +71,7 @@ export function WizardOverlay({ store }: WizardOverlayProps) {
               onClick={() => setWizardStep(i)}
               className="flex flex-1 flex-col items-center gap-1.5"
             >
-              <div className="relative h-1 w-full overflow-hidden rounded-full bg-zinc-800">
+              <div className="relative h-1 w-full overflow-hidden rounded-full bg-border">
                 <div
                   className="absolute inset-y-0 left-0 bg-amber-400 transition-all duration-300"
                   style={{ width: i <= wizardStep ? "100%" : "0%" }}
@@ -80,7 +79,7 @@ export function WizardOverlay({ store }: WizardOverlayProps) {
               </div>
               <span
                 className={`text-[10px] uppercase tracking-wider ${
-                  i <= wizardStep ? "text-amber-400" : "text-zinc-600"
+                  i <= wizardStep ? "text-amber-500 dark:text-amber-400" : "text-subtle"
                 }`}
               >
                 {s.title}
@@ -89,23 +88,21 @@ export function WizardOverlay({ store }: WizardOverlayProps) {
           ))}
         </div>
 
-        {/* Whisper */}
-        <p className="mb-6 min-h-[3rem] text-lg leading-relaxed text-zinc-300">
+        <p className="mb-6 min-h-[3rem] text-lg leading-relaxed text-foreground/80">
           {WHISPERS[wizardStep]}
         </p>
 
-        {/* Step content — no opacity animations */}
         <div>
           {wizardStep === 0 && (
             <div className="space-y-6 text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-400/10 ring-1 ring-amber-400/20">
-                <Sparkles className="h-8 w-8 text-amber-400" />
+                <Sparkles className="h-8 w-8 text-amber-500 dark:text-amber-400" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold tracking-tight text-zinc-50">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground">
                   MTF Lab
                 </h2>
-                <p className="mt-2 text-sm text-zinc-500">
+                <p className="mt-2 text-sm text-muted">
                   Return & Risk Simulator for Margin Trading
                 </p>
               </div>
@@ -117,10 +114,10 @@ export function WizardOverlay({ store }: WizardOverlayProps) {
                 ].map(({ icon: Icon, label }) => (
                   <div
                     key={label}
-                    className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 text-left"
+                    className="rounded-xl border border-border bg-surface/80 p-3 text-left"
                   >
-                    <Icon className="mb-2 h-4 w-4 text-amber-400" />
-                    <p className="text-xs text-zinc-400">{label}</p>
+                    <Icon className="mb-2 h-4 w-4 text-amber-500 dark:text-amber-400" />
+                    <p className="text-xs text-muted">{label}</p>
                   </div>
                 ))}
               </div>
@@ -139,13 +136,12 @@ export function WizardOverlay({ store }: WizardOverlayProps) {
           )}
         </div>
 
-        {/* Navigation */}
         <div className="mt-8 flex items-center justify-between gap-4">
           <button
             type="button"
             onClick={() => setWizardStep(Math.max(0, wizardStep - 1))}
             disabled={wizardStep === 0}
-            className="rounded-lg px-4 py-2 text-sm text-zinc-500 transition hover:text-zinc-300 disabled:opacity-30"
+            className="rounded-lg px-4 py-2 text-sm text-muted transition hover:text-foreground disabled:opacity-30"
           >
             Back
           </button>
@@ -153,7 +149,7 @@ export function WizardOverlay({ store }: WizardOverlayProps) {
             <button
               type="button"
               onClick={closeWizard}
-              className="text-sm text-zinc-500 transition hover:text-zinc-300"
+              className="text-sm text-muted transition hover:text-foreground"
             >
               Skip
             </button>
@@ -187,8 +183,8 @@ function ModeStep({
 }) {
   return (
     <div className="space-y-4">
-      <p className="text-sm text-zinc-500">Select your funding mode</p>
-      <div className="flex flex-wrap gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 p-1.5">
+      <p className="text-sm text-muted">Select your funding mode</p>
+      <div className="flex flex-wrap gap-2 rounded-xl border border-border bg-surface/80 p-1.5">
         <ModePill active={mode === "cash"} onClick={() => onModeChange("cash")}>
           Cash
         </ModePill>
@@ -199,7 +195,7 @@ function ModeStep({
           Mixed
         </ModePill>
       </div>
-      <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/30 p-4 text-sm text-zinc-400">
+      <div className="rounded-xl border border-border bg-surface/60 p-4 text-sm text-muted">
         {mode === "cash" && (
           <p>You put cash as margin. Groww funds the rest at daily interest.</p>
         )}

@@ -30,12 +30,12 @@ export function NumberInput({
 }: NumberInputProps) {
   return (
     <div className={cn("group", className)}>
-      <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">
+      <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted">
         {label}
       </label>
-      <div className="relative flex items-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/80 transition-colors focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20">
+      <div className="relative flex items-center overflow-hidden rounded-lg border border-border bg-surface-elevated transition-colors focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20">
         {prefix && (
-          <span className="pl-3 font-mono text-sm text-zinc-500">{prefix}</span>
+          <span className="pl-3 font-mono text-sm text-muted">{prefix}</span>
         )}
         <input
           type="number"
@@ -44,13 +44,13 @@ export function NumberInput({
           step={step}
           min={min}
           max={max}
-          className="w-full bg-transparent px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none placeholder:text-zinc-600"
+          className="w-full bg-transparent px-3 py-2.5 font-mono text-sm text-foreground outline-none placeholder:text-subtle"
         />
         {suffix && (
-          <span className="pr-3 font-mono text-xs text-zinc-500">{suffix}</span>
+          <span className="pr-3 font-mono text-xs text-muted">{suffix}</span>
         )}
       </div>
-      {hint && <p className="mt-1 text-xs text-zinc-600">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-subtle">{hint}</p>}
     </div>
   );
 }
@@ -79,10 +79,10 @@ export function SliderInput({
   return (
     <div className={cn("", className)}>
       <div className="mb-2 flex items-center justify-between">
-        <label className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+        <label className="text-xs font-medium uppercase tracking-wider text-muted">
           {label}
         </label>
-        <span className="font-mono text-sm font-semibold text-amber-400">
+        <span className="font-mono text-sm font-semibold text-amber-500 dark:text-amber-400">
           {formatValue(value)}
         </span>
       </div>
@@ -93,9 +93,9 @@ export function SliderInput({
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-zinc-800 accent-amber-500 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-400 [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(251,191,36,0.5)]"
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-amber-500 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-400 [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(251,191,36,0.5)]"
       />
-      <div className="mt-1 flex justify-between font-mono text-[10px] text-zinc-600">
+      <div className="mt-1 flex justify-between font-mono text-[10px] text-subtle">
         <span>{formatValue(min)}</span>
         <span>{formatValue(max)}</span>
       </div>
@@ -114,25 +114,25 @@ interface StatCardProps {
 export function StatCard({ label, value, sub, trend, delay = 0 }: StatCardProps) {
   const trendColor =
     trend === "up"
-      ? "text-emerald-400"
+      ? "text-profit"
       : trend === "down"
-        ? "text-rose-400"
-        : "text-zinc-100";
+        ? "text-loss"
+        : "text-foreground";
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-4 backdrop-blur-sm"
+      className="rounded-xl border border-border bg-surface/80 p-4 backdrop-blur-sm"
     >
-      <div className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">
+      <div className="text-[10px] font-medium uppercase tracking-widest text-muted">
         {label}
       </div>
       <p className={cn("mt-1 font-mono text-xl font-semibold tabular-nums", trendColor)}>
         {value}
       </p>
-      {sub && <p className="mt-0.5 text-xs text-zinc-500">{sub}</p>}
+      {sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}
     </motion.div>
   );
 }
@@ -150,16 +150,16 @@ export function Panel({ title, subtitle, children, className, id }: PanelProps) 
     <section
       id={id}
       className={cn(
-        "rounded-2xl border border-zinc-800/60 bg-zinc-950/40 p-6 backdrop-blur-md",
+        "rounded-2xl border border-border bg-surface/60 p-6 backdrop-blur-md",
         className,
       )}
     >
       <div className="mb-5">
-        <h2 className="text-sm font-semibold tracking-tight text-zinc-100">
+        <h2 className="text-sm font-semibold tracking-tight text-foreground">
           {title}
         </h2>
         {subtitle && (
-          <p className="mt-0.5 text-xs text-zinc-500">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-muted">{subtitle}</p>
         )}
       </div>
       {children}
@@ -178,12 +178,11 @@ export function ModePill({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
         "relative rounded-lg px-4 py-2 text-sm font-medium transition-all",
-        active
-          ? "text-amber-950"
-          : "text-zinc-400 hover:text-zinc-200",
+        active ? "text-amber-950" : "text-muted hover:text-foreground",
       )}
     >
       {active && (
@@ -213,7 +212,7 @@ export function WhisperText({
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className={cn("text-lg leading-relaxed text-zinc-300", className)}
+        className={cn("text-lg leading-relaxed text-foreground/80", className)}
       >
         {children}
       </motion.p>

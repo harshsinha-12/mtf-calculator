@@ -52,7 +52,7 @@ export function Dashboard({ store }: DashboardProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-gradient-to-br from-zinc-900/80 via-zinc-950/90 to-zinc-900/80 p-6 backdrop-blur-md"
+        className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-[var(--hero-from)] via-[var(--hero-via)] to-[var(--hero-to)] p-6 backdrop-blur-md"
       >
         <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-400/5 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-emerald-400/5 blur-3xl" />
@@ -60,14 +60,14 @@ export function Dashboard({ store }: DashboardProps) {
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
                 MTF Lab
               </h1>
-              <span className="rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-400 ring-1 ring-amber-400/20">
+              <span className="rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-600 ring-1 ring-amber-400/20 dark:text-amber-400">
                 {inputs.mode}
               </span>
             </div>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-muted">
               {position.quantity} shares @ {formatINR(inputs.stockPrice)} ·{" "}
               {inputs.holdingPeriodDays} day hold · {inputs.leverage}x leverage
             </p>
@@ -77,7 +77,7 @@ export function Dashboard({ store }: DashboardProps) {
             <button
               type="button"
               onClick={goHome}
-              className="flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-zinc-600 hover:text-zinc-200"
+              className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition hover:border-amber-500/30 hover:text-foreground"
             >
               <Home className="h-3.5 w-3.5" />
               Home
@@ -85,7 +85,7 @@ export function Dashboard({ store }: DashboardProps) {
             <button
               type="button"
               onClick={openWizard}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-400/10 px-3 py-1.5 text-xs font-medium text-amber-400 transition hover:bg-amber-400/20"
+              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-400/10 px-3 py-1.5 text-xs font-medium text-amber-600 transition hover:bg-amber-400/20 dark:text-amber-400"
             >
               <Sparkles className="h-3.5 w-3.5" />
               Setup Guide
@@ -93,7 +93,7 @@ export function Dashboard({ store }: DashboardProps) {
             <button
               type="button"
               onClick={reset}
-              className="flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-zinc-600 hover:text-zinc-200"
+              className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition hover:border-amber-500/30 hover:text-foreground"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Reset
@@ -141,7 +141,7 @@ export function Dashboard({ store }: DashboardProps) {
 
       {/* Parameters */}
       <Panel title="Adjust Parameters" subtitle="All values are editable">
-        <div className="mb-4 flex gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 p-1.5">
+        <div className="mb-4 flex gap-2 rounded-xl border border-border bg-surface/80 p-1.5">
           {(["cash", "pledge", "mixed"] as const).map((m) => (
             <button
               key={m}
@@ -150,7 +150,7 @@ export function Dashboard({ store }: DashboardProps) {
               className={`flex-1 rounded-lg py-2 text-xs font-medium capitalize transition ${
                 inputs.mode === m
                   ? "bg-amber-400 text-amber-950"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  : "text-muted hover:text-foreground"
               }`}
             >
               {m}
@@ -168,11 +168,11 @@ export function Dashboard({ store }: DashboardProps) {
         <div className="flex items-start gap-4 rounded-xl border border-amber-500/20 bg-amber-400/5 p-4">
           <Clock className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
           <div>
-            <p className="text-sm leading-relaxed text-zinc-300">
+            <p className="text-sm leading-relaxed text-foreground/80">
               {holdingAnalysis.message}
             </p>
             {holdingAnalysis.maxProfitableDays !== null && (
-              <p className="mt-2 font-mono text-lg font-semibold text-amber-400">
+              <p className="mt-2 font-mono text-lg font-semibold text-amber-600 dark:text-amber-400">
                 Max profitable hold: ~{holdingAnalysis.maxProfitableDays} days
               </p>
             )}
@@ -192,23 +192,23 @@ export function Dashboard({ store }: DashboardProps) {
             ].map((row) => (
               <div
                 key={row.label}
-                className="flex items-center justify-between border-b border-zinc-800/50 pb-2 last:border-0"
+                className="flex items-center justify-between border-b border-border/60 pb-2 last:border-0"
               >
-                <span className="text-xs text-zinc-500">{row.label}</span>
-                <span className="font-mono text-sm font-medium text-zinc-200">
+                <span className="text-xs text-muted">{row.label}</span>
+                <span className="font-mono text-sm font-medium text-foreground">
                   {row.value}
                 </span>
               </div>
             ))}
 
             {inputs.mode !== "cash" && (
-              <div className="mt-4 rounded-lg bg-zinc-900/50 p-3">
-                <p className="text-[10px] uppercase tracking-wider text-zinc-500">
+              <div className="mt-4 rounded-lg bg-surface/80 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted">
                   Pledge Flow
                 </p>
-                <div className="mt-2 space-y-1 text-xs text-zinc-400">
+                <div className="mt-2 space-y-1 text-xs text-muted">
                   <p>Holdings → Haircut {inputs.pledgeHaircut}%</p>
-                  <p className="font-mono text-amber-400">
+                  <p className="font-mono text-amber-600 dark:text-amber-400">
                     → {formatINR(position.usablePledgeMargin)} usable
                   </p>
                 </div>
@@ -222,43 +222,43 @@ export function Dashboard({ store }: DashboardProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs text-zinc-500">
-                  <ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="flex items-center gap-1.5 text-xs text-muted">
+                  <ArrowUpRight className="h-3.5 w-3.5 text-profit" />
                   Gross Profit
                 </span>
-                <span className="font-mono text-sm text-emerald-400">
+                <span className="font-mono text-sm text-profit">
                   {formatINR(result.grossPnL)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs text-zinc-500">
-                  <ArrowDownRight className="h-3.5 w-3.5 text-rose-400" />
+                <span className="flex items-center gap-1.5 text-xs text-muted">
+                  <ArrowDownRight className="h-3.5 w-3.5 text-loss" />
                   Interest
                 </span>
-                <span className="font-mono text-sm text-rose-400">
+                <span className="font-mono text-sm text-loss">
                   -{formatINR(costs.totalInterest)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500">Brokerage</span>
-                <span className="font-mono text-sm text-rose-400">
+                <span className="text-xs text-muted">Brokerage</span>
+                <span className="font-mono text-sm text-loss">
                   -{formatINR(costs.totalBrokerage)}
                 </span>
               </div>
               {inputs.mode !== "cash" && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">Pledge Costs</span>
-                  <span className="font-mono text-sm text-rose-400">
+                  <span className="text-xs text-muted">Pledge Costs</span>
+                  <span className="font-mono text-sm text-loss">
                     -{formatINR(costs.pledgeCosts)}
                   </span>
                 </div>
               )}
-              <div className="border-t border-zinc-800 pt-2">
+              <div className="border-t border-border pt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-zinc-300">Net Profit</span>
+                  <span className="text-sm font-medium text-foreground/80">Net Profit</span>
                   <span
                     className={`font-mono text-lg font-bold ${
-                      isProfitable ? "text-emerald-400" : "text-rose-400"
+                      isProfitable ? "text-profit" : "text-loss"
                     }`}
                   >
                     {formatINR(result.netPnL)}
@@ -269,26 +269,26 @@ export function Dashboard({ store }: DashboardProps) {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500">Exit Value</span>
-                <span className="font-mono text-sm text-zinc-200">
+                <span className="text-xs text-muted">Exit Value</span>
+                <span className="font-mono text-sm text-foreground">
                   {formatINR(result.exitValue)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500">ROI on Cash</span>
-                <span className="font-mono text-sm text-zinc-200">
+                <span className="text-xs text-muted">ROI on Cash</span>
+                <span className="font-mono text-sm text-foreground">
                   {formatPercent(result.roiOnCash)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500">ROI on Economic Capital</span>
-                <span className="font-mono text-sm text-zinc-200">
+                <span className="text-xs text-muted">ROI on Economic Capital</span>
+                <span className="font-mono text-sm text-foreground">
                   {formatPercent(result.roiOnEconomicCapital)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500">Break-even Price</span>
-                <span className="font-mono text-sm text-amber-400">
+                <span className="text-xs text-muted">Break-even Price</span>
+                <span className="font-mono text-sm text-amber-600 dark:text-amber-400">
                   {formatINR(breakEven.price)}
                 </span>
               </div>
@@ -348,40 +348,40 @@ export function Dashboard({ store }: DashboardProps) {
       {/* Risk section */}
       <Panel title="Risk Metrics" subtitle="Understand your downside">
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
-            <p className="text-[10px] uppercase tracking-wider text-zinc-500">
+          <div className="rounded-xl border border-border bg-surface/60 p-4">
+            <p className="text-[10px] uppercase tracking-wider text-muted">
               Effective Leverage
             </p>
-            <p className="mt-1 font-mono text-2xl font-bold text-zinc-100">
+            <p className="mt-1 font-mono text-2xl font-bold text-foreground">
               {risk.effectiveLeverage.toFixed(1)}x
             </p>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs text-muted">
               Position / economic capital
             </p>
           </div>
           <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4">
-            <p className="text-[10px] uppercase tracking-wider text-zinc-500">
+            <p className="text-[10px] uppercase tracking-wider text-muted">
               Loss at -5% Stock Move
             </p>
-            <p className="mt-1 font-mono text-2xl font-bold text-rose-400">
+            <p className="mt-1 font-mono text-2xl font-bold text-loss">
               {formatPercent(risk.lossOnCapitalAt5Pct)}
             </p>
-            <p className="mt-1 text-xs text-zinc-500">On your capital, after costs</p>
+            <p className="mt-1 text-xs text-muted">On your capital, after costs</p>
           </div>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
-            <p className="text-[10px] uppercase tracking-wider text-zinc-500">
+          <div className="rounded-xl border border-border bg-surface/60 p-4">
+            <p className="text-[10px] uppercase tracking-wider text-muted">
               Daily Cost Drag
             </p>
-            <p className="mt-1 font-mono text-2xl font-bold text-amber-400">
+            <p className="mt-1 font-mono text-2xl font-bold text-amber-600 dark:text-amber-400">
               {formatINR(risk.dailyCostDrag)}
             </p>
-            <p className="mt-1 text-xs text-zinc-500">Interest accruing daily</p>
+            <p className="mt-1 text-xs text-muted">Interest accruing daily</p>
           </div>
         </div>
 
-        <div className="mt-4 flex items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-900/30 p-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-          <p className="text-xs leading-relaxed text-zinc-500">
+        <div className="mt-4 flex items-start gap-3 rounded-lg border border-border bg-surface/60 p-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+          <p className="text-xs leading-relaxed text-muted">
             MTF amplifies both gains and losses. A 10% stock drop on 4x leverage
             can mean ~40% loss on your margin before costs. Always factor in
             interest decay for swing trades.
