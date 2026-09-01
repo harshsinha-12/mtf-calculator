@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f4f4f5;
+  --foreground: #18181b;
+  --muted: #71717a;
+  --subtle: #a1a1aa;
+  --surface: #ffffff;
+  --surface-elevated: #fafafa;
+  --border: #e4e4e7;
+  --grid-line: rgba(0, 0, 0, 0.05);
+  --overlay: rgba(0, 0, 0, 0.45);
+  --hero-from: rgba(255, 255, 255, 0.95);
+  --hero-via: rgba(250, 250, 250, 0.98);
+  --hero-to: rgba(255, 255, 255, 0.95);
+  --scrollbar: #d4d4d8;
+  --selection-bg: rgba(251, 191, 36, 0.25);
+  --selection-fg: #18181b;
+  --profit: #059669;
+  --loss: #e11d48;
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --muted: #a1a1aa;
+  --subtle: #71717a;
+  --surface: #18181b;
+  --surface-elevated: #27272a;
+  --border: #3f3f46;
+  --grid-line: rgba(251, 191, 36, 0.04);
+  --overlay: rgba(0, 0, 0, 0.7);
+  --hero-from: rgba(24, 24, 27, 0.8);
+  --hero-via: rgba(9, 9, 11, 0.9);
+  --hero-to: rgba(24, 24, 27, 0.8);
+  --scrollbar: #3f3f46;
+  --selection-bg: rgba(251, 191, 36, 0.3);
+  --selection-fg: #fafafa;
+  --profit: #34d399;
+  --loss: #fb7185;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-profit: var(--profit);
+  --color-loss: var(--loss);
+  --font-sans: var(--font-outfit);
+  --font-mono: var(--font-plex-mono);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
