@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   AlertTriangle,
@@ -117,7 +118,7 @@ export function Dashboard({ store }: DashboardProps) {
         </div>
         <p className="relative mt-1 text-sm text-muted">
           {position.quantity} shares @ {formatINR(inputs.stockPrice)} ·{" "}
-          {inputs.holdingPeriodDays} day hold · {inputs.leverage}x leverage
+          {inputs.holdingPeriodDays} day hold · {Number(inputs.leverage.toFixed(2))}x leverage
         </p>
 
         <div className="relative mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -126,7 +127,7 @@ export function Dashboard({ store }: DashboardProps) {
               <>
                 Net Profit
                 <br />
-                after interest
+                after costs
               </>
             }
             value={formatINR(result.netPnL)}
@@ -216,41 +217,83 @@ export function Dashboard({ store }: DashboardProps) {
         </Panel>
 
         {/* P&L breakdown */}
-        <Panel title="P&L Breakdown" subtitle="At your expected return" className="lg:col-span-2">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs text-muted">
-                  <ArrowUpRight className="h-3.5 w-3.5 text-profit" />
-                  Gross Profit
-                </span>
-                <span className="font-mono text-sm text-profit">
-                  {formatINR(result.grossPnL)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs text-muted">
-                  <ArrowDownRight className="h-3.5 w-3.5 text-loss" />
-                  Interest
-                </span>
-                <span className="font-mono text-sm text-loss">
-                  -{formatINR(costs.totalInterest)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted">Brokerage</span>
-                <span className="font-mono text-sm text-loss">
-                  -{formatINR(costs.totalBrokerage)}
-                </span>
-              </div>
+        <Panel
+          title="P&L Breakdown"
+          subtitle="Buy charges from price × quantity · sell statutory pending a sell note"
+          className="lg:col-span-2"
+        >
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-3">
+              <ChargeRow
+                label="Gross Profit"
+                value={formatINR(result.grossPnL)}
+                tone="profit"
+                icon={<ArrowUpRight className="h-3.5 w-3.5 text-profit" />}
+              />
+              <ChargeRow
+                label="Interest on funded amount"
+                value={`-${formatINR(costs.totalInterest)}`}
+                tone="loss"
+                icon={<ArrowDownRight className="h-3.5 w-3.5 text-loss" />}
+              />
+
+              <ChargeGroup title="Groww charges">
+                <ChargeRow
+                  label="Brokerage (buy)"
+                  value={`-${formatINR(costs.buyBrokerage)}`}
+                  tone="loss"
+                />
+                <ChargeRow
+                  label="Brokerage (sell est.)"
+                  value={`-${formatINR(costs.sellBrokerage)}`}
+                  tone="loss"
+                />
+              </ChargeGroup>
+
+              <ChargeGroup title="External charges">
+                <ChargeRow
+                  label="Exchange transaction"
+                  value={`-${formatINR(costs.exchangeCharges)}`}
+                  tone="loss"
+                />
+                <ChargeRow
+                  label="Stamp duty"
+                  value={`-${formatINR(costs.stampDuty)}`}
+                  tone="loss"
+                />
+                <ChargeRow
+                  label="SEBI turnover"
+                  value={`-${formatINR(costs.sebiCharges)}`}
+                  tone="loss"
+                />
+                <ChargeRow
+                  label="IPF"
+                  value={`-${formatINR(costs.ipfCharges)}`}
+                  tone="loss"
+                />
+              </ChargeGroup>
+
+              <ChargeGroup title="Taxes">
+                <ChargeRow
+                  label="GST"
+                  value={`-${formatINR(costs.gst)}`}
+                  tone="loss"
+                />
+                <ChargeRow
+                  label="STT (buy)"
+                  value={`-${formatINR(costs.stt)}`}
+                  tone="loss"
+                />
+              </ChargeGroup>
+
               {inputs.mode !== "cash" && (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted">Pledge Costs</span>
-                  <span className="font-mono text-sm text-loss">
-                    -{formatINR(costs.pledgeCosts)}
-                  </span>
-                </div>
+                <ChargeRow
+                  label="Pledge Costs"
+                  value={`-${formatINR(costs.pledgeCosts)}`}
+                  tone="loss"
+                />
               )}
+
               <div className="border-t border-border pt-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-foreground/80">Net Profit</span>
@@ -266,30 +309,32 @@ export function Dashboard({ store }: DashboardProps) {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted">Exit Value</span>
-                <span className="font-mono text-sm text-foreground">
-                  {formatINR(result.exitValue)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted">ROI on Cash</span>
-                <span className="font-mono text-sm text-foreground">
-                  {formatPercent(result.roiOnCash)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted">ROI on Economic Capital</span>
-                <span className="font-mono text-sm text-foreground">
-                  {formatPercent(result.roiOnEconomicCapital)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted">Break-even Price</span>
-                <span className="font-mono text-sm text-amber-600 dark:text-amber-400">
-                  {formatINR(breakEven.price)}
-                </span>
-              </div>
+              <ChargeRow
+                label="Trade value"
+                value={formatINR(position.totalPosition)}
+              />
+              <ChargeRow
+                label="Exit Value"
+                value={formatINR(result.exitValue)}
+              />
+              <ChargeRow
+                label="ROI on Cash"
+                value={formatPercent(result.roiOnCash)}
+              />
+              <ChargeRow
+                label="ROI on Economic Capital"
+                value={formatPercent(result.roiOnEconomicCapital)}
+              />
+              <ChargeRow
+                label="Break-even Price"
+                value={formatINR(breakEven.price)}
+                className="text-amber-600 dark:text-amber-400"
+              />
+              <p className="pt-2 text-[11px] leading-relaxed text-muted">
+                Statutory buy charges scale with turnover (stock price × quantity).
+                Sell STT, exchange, and DP charges will be added once a sell
+                contract note is available.
+              </p>
             </div>
           </div>
         </Panel>
@@ -331,6 +376,7 @@ export function Dashboard({ store }: DashboardProps) {
             min={-20}
             max={30}
             step={1}
+            unit="%"
             formatValue={(v) => `${v > 0 ? "+" : ""}${v}%`}
           />
           <div className="mt-4">
@@ -386,6 +432,54 @@ export function Dashboard({ store }: DashboardProps) {
           </p>
         </div>
       </Panel>
+    </div>
+  );
+}
+
+function ChargeGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-border/70 bg-surface/50 px-3 py-2">
+      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
+        {title}
+      </p>
+      <div className="space-y-1.5">{children}</div>
+    </div>
+  );
+}
+
+function ChargeRow({
+  label,
+  value,
+  tone,
+  icon,
+  className,
+}: {
+  label: string;
+  value: string;
+  tone?: "profit" | "loss";
+  icon?: ReactNode;
+  className?: string;
+}) {
+  const valueColor =
+    tone === "profit"
+      ? "text-profit"
+      : tone === "loss"
+        ? "text-loss"
+        : className || "text-foreground";
+
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="flex items-center gap-1.5 text-xs text-muted">
+        {icon}
+        {label}
+      </span>
+      <span className={`font-mono text-sm tabular-nums ${valueColor}`}>{value}</span>
     </div>
   );
 }

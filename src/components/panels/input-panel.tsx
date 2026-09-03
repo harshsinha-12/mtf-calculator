@@ -49,15 +49,16 @@ export function InputPanel({ inputs, onChange, step = "all" }: InputPanelProps) 
                 step={10000}
                 min={0}
               />
-              <SliderInput
-                label="Haircut"
-                value={inputs.pledgeHaircut}
-                onChange={(v) => onChange({ pledgeHaircut: v })}
-                min={0}
-                max={80}
-                step={5}
-                formatValue={(v) => `${v}%`}
-              />
+          <SliderInput
+            label="Haircut"
+            value={inputs.pledgeHaircut}
+            onChange={(v) => onChange({ pledgeHaircut: v })}
+            min={0}
+            max={80}
+            step={5}
+            unit="%"
+            formatValue={(v) => `${v}%`}
+          />
             </>
           )}
           <SliderInput
@@ -66,8 +67,9 @@ export function InputPanel({ inputs, onChange, step = "all" }: InputPanelProps) 
             onChange={(v) => onChange({ leverage: v })}
             min={1}
             max={5}
-            step={0.5}
-            formatValue={(v) => `${v}x`}
+            step={0.01}
+            unit="x"
+            formatValue={(v) => `${Number(v.toFixed(2))}x`}
           />
         </>
       )}
@@ -81,6 +83,7 @@ export function InputPanel({ inputs, onChange, step = "all" }: InputPanelProps) 
             min={1}
             max={365}
             step={1}
+            unit="days"
             formatValue={(v) => `${v} days`}
           />
           <NumberInput
@@ -99,6 +102,7 @@ export function InputPanel({ inputs, onChange, step = "all" }: InputPanelProps) 
             suffix="%"
             step={0.01}
             min={0}
+            hint="Groww MTF: 0.1% of order value (price × quantity)"
           />
           {inputs.mode !== "cash" && (
             <>
@@ -127,6 +131,7 @@ export function InputPanel({ inputs, onChange, step = "all" }: InputPanelProps) 
             suffix="%"
             step={1}
             min={0}
+            hint="18% on brokerage + exchange + SEBI + IPF"
           />
         </>
       )}
@@ -140,6 +145,7 @@ export function InputPanel({ inputs, onChange, step = "all" }: InputPanelProps) 
             min={-30}
             max={50}
             step={0.5}
+            unit="%"
             formatValue={(v) => `${v > 0 ? "+" : ""}${v}%`}
           />
         </div>

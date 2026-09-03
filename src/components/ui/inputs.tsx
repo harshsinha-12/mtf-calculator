@@ -62,6 +62,7 @@ interface SliderInputProps {
   min: number;
   max: number;
   step?: number;
+  unit?: string;
   formatValue?: (v: number) => string;
   className?: string;
 }
@@ -73,18 +74,36 @@ export function SliderInput({
   min,
   max,
   step = 1,
+  unit,
   formatValue = (v) => String(v),
   className,
 }: SliderInputProps) {
   return (
     <div className={cn("", className)}>
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between gap-3">
         <label className="text-xs font-medium uppercase tracking-wider text-muted">
           {label}
         </label>
-        <span className="font-mono text-sm font-semibold text-amber-500 dark:text-amber-400">
-          {formatValue(value)}
-        </span>
+        <div className="flex items-center gap-1 font-mono text-sm font-semibold text-amber-500 dark:text-amber-400">
+          <input
+            type="number"
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            onChange={(e) => {
+              const next = parseFloat(e.target.value);
+              if (!Number.isFinite(next)) return;
+              const snapped = Number(
+                (Math.round(next / step) * step).toPrecision(12),
+              );
+              onChange(Math.min(max, Math.max(min, snapped)));
+            }}
+            className="w-20 bg-transparent text-right outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            aria-label={label}
+          />
+          {unit && <span className="text-xs font-medium">{unit}</span>}
+        </div>
       </div>
       <input
         type="range"

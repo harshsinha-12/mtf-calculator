@@ -118,10 +118,11 @@ export function useMTFStore() {
   }, []);
 
   const position = useMemo(() => calculatePosition(inputs), [inputs]);
-  const costs = useMemo(
-    () => calculateCosts(inputs, position),
-    [inputs, position],
-  );
+  const costs = useMemo(() => {
+    const exitValue =
+      position.totalPosition * (1 + inputs.expectedReturn / 100);
+    return calculateCosts(inputs, position, exitValue);
+  }, [inputs, position]);
   const result = useMemo(
     () => calculateTradeResult(inputs, position),
     [inputs, position],

@@ -18,7 +18,7 @@ const WHISPERS: Record<number, string> = {
   0: "Let's figure out if your MTF trade is worth it — before interest eats your lunch.",
   1: "How are you funding this trade? Cash, pledged holdings, or a mix of both?",
   2: "Set your position. Stock price, capital, and leverage define your exposure.",
-  3: "MTF isn't free. Interest, brokerage, and pledge charges compound daily.",
+  3: "MTF isn't free. Interest, brokerage, STT, stamp duty, and GST all scale with price × quantity.",
   4: "Now simulate. How much do you expect the stock to move?",
 };
 

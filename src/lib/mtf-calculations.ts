@@ -1,3 +1,8 @@
+import {
+  buyChargeFraction,
+  chargesOnTurnover,
+  sellBrokerageFraction,
+} from "./groww-charges";
 import type { MTFInputs } from "./mtf-schema";
 
 export interface PositionBreakdown {
@@ -17,7 +22,14 @@ export interface CostBreakdown {
   buyBrokerage: number;
   sellBrokerage: number;
   totalBrokerage: number;
+  stt: number;
+  stampDuty: number;
+  exchangeCharges: number;
+  sebiCharges: number;
+  ipfCharges: number;
+  gst: number;
   pledgeCosts: number;
+  totalCharges: number;
   totalFixedCosts: number;
 }
 
@@ -100,6 +112,28 @@ export function calculatePosition(inputs: MTFInputs): PositionBreakdown {
   };
 }
 
+function pledgeCostsFor(inputs: MTFInputs): number {
+  if (inputs.mode === "cash") return 0;
+  return (inputs.pledgeCharge + inputs.unpledgeCharge) * (1 + inputs.gstPercent / 100);
+}
+
+function breakEvenReturnAtDays(
+  inputs: MTFInputs,
+  position: PositionBreakdown,
+  days: number,
+): number {
+  const P = position.totalPosition;
+  const F = position.brokerFunded;
+  const dailyRate = inputs.dailyInterestRate / 100;
+  const kBuy = buyChargeFraction(inputs.brokeragePercent, inputs.gstPercent);
+  const sellLoad = sellBrokerageFraction(inputs.brokeragePercent, inputs.gstPercent);
+  const pledgeCosts = pledgeCostsFor(inputs);
+  const interest = F * dailyRate * days;
+  const denominator = P * (1 - sellLoad);
+  const numerator = interest + P * kBuy + P * sellLoad + pledgeCosts;
+  return denominator > 0 ? (numerator / denominator) * 100 : 0;
+}
+
 export function calculateCosts(
   inputs: MTFInputs,
   position: PositionBreakdown,
@@ -107,31 +141,54 @@ export function calculateCosts(
 ): CostBreakdown {
   const exit = exitValue ?? position.totalPosition;
   const dailyRate = inputs.dailyInterestRate / 100;
-  const brokerageRate = inputs.brokeragePercent / 100;
-  const gstMultiplier = 1 + inputs.gstPercent / 100;
 
   const dailyInterest = position.brokerFunded * dailyRate;
   const totalInterest = dailyInterest * inputs.holdingPeriodDays;
   const weeklyInterest = dailyInterest * 7;
 
-  const buyBrokerage = position.totalPosition * brokerageRate;
-  const sellBrokerage = exit * brokerageRate;
-  const totalBrokerage = buyBrokerage + sellBrokerage;
+  const buy = chargesOnTurnover(
+    position.totalPosition,
+    inputs.brokeragePercent,
+    inputs.gstPercent,
+    "buy",
+  );
+  const sell = chargesOnTurnover(
+    exit,
+    inputs.brokeragePercent,
+    inputs.gstPercent,
+    "sell",
+  );
 
-  const pledgeCosts =
-    inputs.mode === "cash"
-      ? 0
-      : (inputs.pledgeCharge + inputs.unpledgeCharge) * gstMultiplier;
+  const pledgeCosts = pledgeCostsFor(inputs);
+  const totalBrokerage = buy.brokerage + sell.brokerage;
+  const gst = buy.gst + sell.gst;
+  const totalCharges =
+    totalInterest +
+    totalBrokerage +
+    buy.stt +
+    buy.stampDuty +
+    buy.exchangeCharges +
+    buy.sebiCharges +
+    buy.ipfCharges +
+    gst +
+    pledgeCosts;
 
   return {
     totalInterest,
     dailyInterest,
     weeklyInterest,
-    buyBrokerage,
-    sellBrokerage,
+    buyBrokerage: buy.brokerage,
+    sellBrokerage: sell.brokerage,
     totalBrokerage,
+    stt: buy.stt,
+    stampDuty: buy.stampDuty,
+    exchangeCharges: buy.exchangeCharges,
+    sebiCharges: buy.sebiCharges,
+    ipfCharges: buy.ipfCharges,
+    gst,
     pledgeCosts,
-    totalFixedCosts: totalInterest + totalBrokerage + pledgeCosts,
+    totalCharges,
+    totalFixedCosts: totalCharges,
   };
 }
 
@@ -145,35 +202,19 @@ export function calculateNetPnL(
   const exitValue = position.totalPosition * (1 + returnDecimal);
   const costs = calculateCosts(inputs, position, exitValue);
 
-  return grossPnL - costs.totalInterest - costs.totalBrokerage - costs.pledgeCosts;
+  return grossPnL - costs.totalCharges;
 }
 
 export function calculateBreakEven(
   inputs: MTFInputs,
   position: PositionBreakdown,
 ): { returnPercent: number; price: number } {
-  const P = position.totalPosition;
-  const F = position.brokerFunded;
-  const d = inputs.holdingPeriodDays;
-  const dailyRate = inputs.dailyInterestRate / 100;
-  const b = inputs.brokeragePercent / 100;
-  const gstMultiplier = 1 + inputs.gstPercent / 100;
-
-  const interest = F * dailyRate * d;
-  const pledgeCosts =
-    inputs.mode === "cash"
-      ? 0
-      : (inputs.pledgeCharge + inputs.unpledgeCharge) * gstMultiplier;
-
-  // net = P*r - interest - P*b - P*(1+r)*b - pledge = 0
-  // r*(P - P*b) = interest + 2*P*b + pledge
-  const numerator = interest + 2 * P * b + pledgeCosts;
-  const denominator = P * (1 - b);
-
-  const returnDecimal = denominator > 0 ? numerator / denominator : 0;
-  const returnPercent = returnDecimal * 100;
-  const price = inputs.stockPrice * (1 + returnDecimal);
-
+  const returnPercent = breakEvenReturnAtDays(
+    inputs,
+    position,
+    inputs.holdingPeriodDays,
+  );
+  const price = inputs.stockPrice * (1 + returnPercent / 100);
   return { returnPercent, price };
 }
 
@@ -185,8 +226,7 @@ export function calculateTradeResult(
   const exitValue = position.totalPosition * (1 + returnDecimal);
   const grossPnL = position.totalPosition * returnDecimal;
   const costs = calculateCosts(inputs, position, exitValue);
-  const netPnL =
-    grossPnL - costs.totalInterest - costs.totalBrokerage - costs.pledgeCosts;
+  const netPnL = grossPnL - costs.totalCharges;
 
   const economicCapital = Math.max(position.yourMargin, 1);
   const cashDeployed = Math.max(position.cashContribution, 1);
@@ -254,23 +294,12 @@ export function generateBreakEvenCurve(
   maxDays = 365,
 ): { days: number; breakEvenReturn: number }[] {
   const data: { days: number; breakEvenReturn: number }[] = [];
-  const P = position.totalPosition;
-  const F = position.brokerFunded;
-  const dailyRate = inputs.dailyInterestRate / 100;
-  const b = inputs.brokeragePercent / 100;
-  const gstMultiplier = 1 + inputs.gstPercent / 100;
-  const pledgeCosts =
-    inputs.mode === "cash"
-      ? 0
-      : (inputs.pledgeCharge + inputs.unpledgeCharge) * gstMultiplier;
 
   for (let days = 1; days <= maxDays; days++) {
-    const interest = F * dailyRate * days;
-    const numerator = interest + 2 * P * b + pledgeCosts;
-    const denominator = P * (1 - b);
-    const returnPercent =
-      denominator > 0 ? (numerator / denominator) * 100 : 0;
-    data.push({ days, breakEvenReturn: returnPercent });
+    data.push({
+      days,
+      breakEvenReturn: breakEvenReturnAtDays(inputs, position, days),
+    });
   }
 
   return data;
@@ -278,7 +307,7 @@ export function generateBreakEvenCurve(
 
 export function generateLeverageComparison(
   inputs: MTFInputs,
-  leverages: number[] = [1, 2, 2.5, 3, 4],
+  leverages: number[] = [1, 2, 2.5, 2.95, 3, 4],
 ): { leverage: number; netPnL: number; roi: number }[] {
   return leverages.map((lev) => {
     const modified = { ...inputs, leverage: lev };
@@ -315,16 +344,13 @@ export function calculateHoldingAnalysis(
   const P = position.totalPosition;
   const F = position.brokerFunded;
   const dailyRate = inputs.dailyInterestRate / 100;
-  const b = inputs.brokeragePercent / 100;
   const er = inputs.expectedReturn / 100;
-  const gstMultiplier = 1 + inputs.gstPercent / 100;
-  const pledgeCosts =
-    inputs.mode === "cash"
-      ? 0
-      : (inputs.pledgeCharge + inputs.unpledgeCharge) * gstMultiplier;
+  const kBuy = buyChargeFraction(inputs.brokeragePercent, inputs.gstPercent);
+  const sellLoad = sellBrokerageFraction(inputs.brokeragePercent, inputs.gstPercent);
+  const pledgeCosts = pledgeCostsFor(inputs);
 
   const profitBeforeTime =
-    er * P - P * b * (2 + er) - pledgeCosts;
+    er * P - P * kBuy - P * (1 + er) * sellLoad - pledgeCosts;
 
   if (profitBeforeTime <= 0 || F <= 0 || dailyRate <= 0) {
     return {
